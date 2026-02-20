@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mercury-plus",
+    "name": "Mercury+",
     "slug": "mercury-plus",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,18 +11,29 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#00A86B"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mercuryplus.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Mercury+ needs camera access to scan prescriptions and barcodes.",
+        "NSPhotoLibraryUsageDescription": "Mercury+ needs photo library access to upload prescription images.",
+        "NSLocationWhenInUseUsageDescription": "Mercury+ needs your location to find nearby pharmacy branches."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#00A86B"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.mercuryplus.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -30,7 +41,27 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Mercury+ to scan prescriptions and barcodes."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Mercury+ to upload prescription images."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Mercury+ to find nearby pharmacy branches."
+        }
+      ],
+      "expo-barcode-scanner",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
