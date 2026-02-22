@@ -9,32 +9,70 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
+  const { signIn, signInWithGoogle, signInWithApple, signInWithFacebook, loading } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
-  const handleSignIn = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.replace('/(tabs)');
-    }, 800);
-  };
+  const isLoading = loading || localLoading;
 
-  const handleSSO = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.replace('/(tabs)');
-    }, 600);
-  };
+  async function handleSignIn() {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Missing fields', 'Please enter your email and password.');
+      return;
+    }
+    setLocalLoading(true);
+    try {
+      await signIn(email.trim(), password);
+    } catch (error) {
+      Alert.alert('Sign In Failed', 'Please check your credentials and try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setLocalLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      Alert.alert('Google Sign-In Failed', 'Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  }
+
+  async function handleFacebook() {
+    setLocalLoading(true);
+    try {
+      await signInWithFacebook();
+    } catch (error) {
+      Alert.alert('Facebook Sign-In Failed', 'Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  }
+
+  async function handleApple() {
+    setLocalLoading(true);
+    try {
+      await signInWithApple();
+    } catch (error) {
+      Alert.alert('Apple Sign-In Failed', 'Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,20 +96,35 @@ export default function LoginScreen() {
 
           {/* SSO Buttons */}
           <View style={styles.ssoSection}>
-            <Pressable style={styles.googleButton} onPress={handleSSO}>
+            <Pressable
+              style={[styles.googleButton, isLoading && styles.buttonDisabled]}
+              onPress={handleGoogle}
+              disabled={isLoading}
+            >
               <Ionicons name="logo-google" size={20} color="#4285F4" />
               <Text style={styles.googleButtonText}>Continue with Google</Text>
             </Pressable>
 
-            <Pressable style={styles.facebookButton} onPress={handleSSO}>
+            <Pressable
+              style={[styles.facebookButton, isLoading && styles.buttonDisabled]}
+              onPress={handleFacebook}
+              disabled={isLoading}
+            >
               <Ionicons name="logo-facebook" size={20} color="#FFFFFF" />
               <Text style={styles.facebookButtonText}>Continue with Facebook</Text>
             </Pressable>
 
-            <Pressable style={styles.appleButton} onPress={handleSSO}>
-              <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
-              <Text style={styles.appleButtonText}>Continue with Apple</Text>
-            </Pressable>
+            {/* Apple Sign-In: shown on iOS only */}
+            {Platform.OS === 'ios' && (
+              <Pressable
+                style={[styles.appleButton, isLoading && styles.buttonDisabled]}
+                onPress={handleApple}
+                disabled={isLoading}
+              >
+                <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
+                <Text style={styles.appleButtonText}>Continue with Apple</Text>
+              </Pressable>
+            )}
           </View>
 
           {/* OR Divider */}
@@ -94,6 +147,7 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
@@ -107,6 +161,7 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                editable={!isLoading}
               />
               <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                 <Ionicons
@@ -117,8 +172,12 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-            <Pressable style={styles.signInButton} onPress={handleSignIn} disabled={loading}>
-              {loading ? (
+            <Pressable
+              style={[styles.signInButton, isLoading && styles.buttonDisabled]}
+              onPress={handleSignIn}
+              disabled={isLoading}
+            >
+              {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text style={styles.signInButtonText}>Sign In</Text>
@@ -128,13 +187,13 @@ export default function LoginScreen() {
 
           {/* Links */}
           <View style={styles.links}>
-            <Pressable onPress={() => router.push('/(auth)/signup')}>
+            <Pressable onPress={() => router.push('/(auth)/signup')} disabled={isLoading}>
               <Text style={styles.linkText}>
                 Don't have an account? <Text style={styles.linkTextBold}>Sign Up</Text>
               </Text>
             </Pressable>
 
-            <Pressable style={styles.forgotPassword}>
+            <Pressable style={styles.forgotPassword} disabled={isLoading}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </Pressable>
           </View>
@@ -201,6 +260,9 @@ const styles = StyleSheet.create({
   ssoSection: {
     gap: 12,
     marginBottom: 24,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   googleButton: {
     flexDirection: 'row',

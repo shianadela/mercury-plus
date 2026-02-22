@@ -1,12 +1,12 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ReminderProvider } from '@/context/ReminderContext';
 
@@ -29,6 +29,32 @@ const MercuryTheme = {
     border: '#E5E7EB',
   },
 };
+
+/** Watches auth state and redirects to the correct route. */
+function AuthGate() {
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user) {
+      // Not authenticated — send to login
+      if (!inAuthGroup) router.replace('/(auth)/login');
+    } else if (!user.onboarded) {
+      // Authenticated but hasn't completed onboarding
+      if (segments[1] !== 'onboarding') router.replace('/(auth)/onboarding');
+    } else {
+      // Fully authenticated — redirect away from auth screens
+      if (inAuthGroup) router.replace('/(tabs)');
+    }
+  }, [user, loading, segments]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -55,6 +81,7 @@ export default function RootLayout() {
       <CartProvider>
         <ReminderProvider>
           <ThemeProvider value={MercuryTheme}>
+            <AuthGate />
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />

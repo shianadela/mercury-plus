@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
 
 const HEALTH_CONDITIONS = [
   'Diabetes',
@@ -36,6 +36,7 @@ const NOTIFICATION_OPTIONS = [
 ];
 
 export default function OnboardingScreen() {
+  const { completeOnboarding, user } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -68,11 +69,20 @@ export default function OnboardingScreen() {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  async function finishOnboarding() {
+    await completeOnboarding({
+      role: user?.role ?? 'patient',
+      healthPreferences: selectedConditions.filter((c) => c !== 'None'),
+      displayName: user?.displayName,
+    });
+    // AuthGate in _layout.tsx will redirect to (tabs) automatically
+  }
+
   const handleNext = () => {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      router.replace('/(tabs)');
+      finishOnboarding();
     }
   };
 
@@ -80,7 +90,7 @@ export default function OnboardingScreen() {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      router.replace('/(tabs)');
+      finishOnboarding();
     }
   };
 

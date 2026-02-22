@@ -9,12 +9,16 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SignUpScreen() {
+  const { signUp, loading } = useAuth();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,15 +26,34 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'patient' | 'caregiver' | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
-  const handleCreateAccount = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push('/(auth)/onboarding');
-    }, 800);
-  };
+  const isLoading = loading || localLoading;
+
+  async function handleCreateAccount() {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Missing fields', 'Please fill in all required fields.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Password mismatch', 'Passwords do not match. Please try again.');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Weak password', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    setLocalLoading(true);
+    try {
+      await signUp(email.trim(), password, fullName.trim());
+      // AuthGate in _layout.tsx will redirect to onboarding automatically
+    } catch (error) {
+      Alert.alert('Sign Up Failed', 'Could not create account. Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,7 +68,7 @@ export default function SignUpScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Pressable onPress={() => router.back()} style={styles.backButton} disabled={isLoading}>
               <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
             </Pressable>
             <Text style={styles.headerTitle}>Create Account</Text>
@@ -63,6 +86,7 @@ export default function SignUpScreen() {
                 value={fullName}
                 onChangeText={setFullName}
                 autoCapitalize="words"
+                editable={!isLoading}
               />
             </View>
 
@@ -77,6 +101,7 @@ export default function SignUpScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
@@ -90,6 +115,7 @@ export default function SignUpScreen() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                editable={!isLoading}
               />
               <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                 <Ionicons
@@ -110,8 +136,12 @@ export default function SignUpScreen() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
+                editable={!isLoading}
               />
-              <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeButton}>
+              <Pressable
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeButton}
+              >
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
@@ -130,6 +160,7 @@ export default function SignUpScreen() {
                 selectedRole === 'patient' && styles.roleCardSelected,
               ]}
               onPress={() => setSelectedRole('patient')}
+              disabled={isLoading}
             >
               <View style={[
                 styles.roleIconCircle,
@@ -161,6 +192,7 @@ export default function SignUpScreen() {
                 selectedRole === 'caregiver' && styles.roleCardSelected,
               ]}
               onPress={() => setSelectedRole('caregiver')}
+              disabled={isLoading}
             >
               <View style={[
                 styles.roleIconCircle,
@@ -188,8 +220,12 @@ export default function SignUpScreen() {
           </View>
 
           {/* Create Account Button */}
-          <Pressable style={styles.createButton} onPress={handleCreateAccount} disabled={loading}>
-            {loading ? (
+          <Pressable
+            style={[styles.createButton, isLoading && styles.buttonDisabled]}
+            onPress={handleCreateAccount}
+            disabled={isLoading}
+          >
+            {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.createButtonText}>Create Account</Text>
@@ -197,7 +233,7 @@ export default function SignUpScreen() {
           </Pressable>
 
           {/* Sign In Link */}
-          <Pressable onPress={() => router.back()} style={styles.signInLink}>
+          <Pressable onPress={() => router.back()} style={styles.signInLink} disabled={isLoading}>
             <Text style={styles.signInLinkText}>
               Already have an account? <Text style={styles.signInLinkBold}>Sign In</Text>
             </Text>
@@ -328,6 +364,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#00A86B',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   createButton: {
     backgroundColor: '#00A86B',
