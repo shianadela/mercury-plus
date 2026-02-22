@@ -6,11 +6,13 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/context/AuthContext';
 
 interface MenuItem {
   icon: keyof typeof Ionicons.glyphMap;
@@ -101,6 +103,18 @@ const stats = [
 ];
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
+
+  const displayName = user?.displayName || 'User';
+  const email = user?.email || '';
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+  const role = user?.role === 'caregiver' ? 'Caregiver' : 'Patient';
+
   const handleMenuPress = (item: MenuItem) => {
     if (item.route) {
       router.push(item.route as any);
@@ -115,7 +129,14 @@ export default function ProfileScreen() {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: () => console.log('Signed out') },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            // AuthGate in _layout.tsx will redirect to login automatically
+          },
+        },
       ],
     );
   };
@@ -126,18 +147,22 @@ export default function ProfileScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>JD</Text>
-            </View>
+            {user?.photoURL ? (
+              <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+            )}
             <Pressable style={styles.editAvatarButton}>
               <Ionicons name="camera" size={14} color="#FFFFFF" />
             </Pressable>
           </View>
-          <Text style={styles.userName}>Juan Dela Cruz</Text>
-          <Text style={styles.userEmail}>juan@email.com</Text>
+          <Text style={styles.userName}>{displayName}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
           <View style={styles.roleBadge}>
-            <Ionicons name="person" size={12} color={Colors.light.tint} />
-            <Text style={styles.roleBadgeText}>Patient</Text>
+            <Ionicons name={role === 'Caregiver' ? 'people' : 'person'} size={12} color={Colors.light.tint} />
+            <Text style={styles.roleBadgeText}>{role}</Text>
           </View>
         </View>
 
