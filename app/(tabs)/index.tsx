@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Image,
   FlatList,
   Dimensions,
   RefreshControl,
@@ -14,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +38,17 @@ const nearbyBranches = [
 ];
 
 export default function HomeScreen() {
+  const { itemCount } = useCart();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+
+  const displayName = user?.displayName || 'User';
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -57,7 +68,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Magandang araw!</Text>
-            <Text style={styles.userName}>Juan Dela Cruz</Text>
+            <Text style={styles.userName}>{displayName}</Text>
           </View>
           <View style={styles.headerRight}>
             <Pressable style={styles.iconButton} onPress={() => router.push('/reminders')}>
@@ -68,7 +79,7 @@ export default function HomeScreen() {
             </Pressable>
             <Pressable style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>JD</Text>
+                <Text style={styles.avatarText}>{initials}</Text>
               </View>
             </Pressable>
           </View>
@@ -223,6 +234,19 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Floating Cart Button */}
+      <Pressable
+        style={styles.cartFab}
+        onPress={() => router.push('/checkout')}
+      >
+        <Ionicons name="cart" size={26} color="#FFFFFF" />
+        {itemCount > 0 && (
+          <View style={styles.cartBadge}>
+            <Text style={styles.cartBadgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
+          </View>
+        )}
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -540,5 +564,40 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#A16207',
     lineHeight: 18,
+  },
+  cartFab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#00A86B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#EF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  cartBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

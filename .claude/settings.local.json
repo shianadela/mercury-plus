@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git add \"app/\\(tabs\\)/profile.tsx\" README.md CLAUDE_PROMPT.md && git commit -m \"$\\(cat <<'EOF'\nfeat: add dynamic profile data, sign out flow, and project README\n\n- Profile screen now displays actual logged-in user data \\(name, email,\n  initials, role\\) instead of hardcoded values, with photo URL support\n- Sign out button calls AuthContext.signOut\\(\\) to clear Firebase session\n  and AsyncStorage, triggering AuthGate redirect to login\n- Add comprehensive README.md with setup guide, env vars, project\n  structure, testing instructions, and auth architecture docs\n- Add CLAUDE_PROMPT.md for feature verification reference\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git status)"
     ]
   }
 }

@@ -33,9 +33,9 @@ ${VALID_NAME}                 Juan Dela Cruz
 ${VALID_INITIALS}             JD
 
 # New User Registration
-${NEW_EMAIL}                  maria.santos@email.com
+${NEW_EMAIL}                  juan.delacruz@email.com
 ${NEW_PASSWORD}               Secure@Pass1
-${NEW_NAME}                   Maria Santos
+${NEW_NAME}                   Juan Dela Cruz
 ${WEAK_PASSWORD}              123
 ${INVALID_EMAIL}              not-an-email
 ${EMPTY_STRING}               ${EMPTY}

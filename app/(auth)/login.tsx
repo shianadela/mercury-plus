@@ -101,7 +101,9 @@ export default function LoginScreen() {
               onPress={handleGoogle}
               disabled={isLoading}
             >
-              <Ionicons name="logo-google" size={20} color="#4285F4" />
+              <View style={styles.googleIconContainer}>
+                <Text style={styles.googleIconText}>G</Text>
+              </View>
               <Text style={styles.googleButtonText}>Continue with Google</Text>
             </Pressable>
 
@@ -279,6 +281,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
+  },
+  googleIconContainer: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  googleIconText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#EA4335',
   },
   googleButtonText: {
     fontSize: 15,

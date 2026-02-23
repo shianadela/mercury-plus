@@ -247,7 +247,7 @@ Signup As Caregiver With Valid Details
     [Documentation]    Verify new caregiver registration
     [Tags]    happy_path    signup    priority_high
     Navigate To Signup Screen
-    Complete Signup Flow    Maria Santos    caregiver@email.com    ${NEW_PASSWORD}    ${NEW_PASSWORD}    Caregiver
+    Complete Signup Flow    Juan Dela Cruz    caregiver@email.com    ${NEW_PASSWORD}    ${NEW_PASSWORD}    Caregiver
     Verify Screen Is Displayed    onboarding-screen
 
 Signup Role Selection Visual Feedback

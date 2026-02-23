@@ -1,20 +1,20 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithCredential,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  OAuthProvider,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  updateProfile as firebaseUpdateProfile,
-} from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import * as WebBrowser from 'expo-web-browser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import * as Crypto from 'expo-crypto';
+import * as WebBrowser from 'expo-web-browser';
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  OAuthProvider,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  updateProfile as firebaseUpdateProfile,
+  onAuthStateChanged,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 // Warm up the browser for OAuth flows
 WebBrowser.maybeCompleteAuthSession();
@@ -242,8 +242,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const mockUser = createMockUser({
       uid: 'google-mock-001',
       email: 'demo.google@mercuryplus.ph',
-      displayName: 'Maria Santos',
-      photoURL: 'https://ui-avatars.com/api/?name=Maria+Santos&background=00A86B&color=fff',
+      displayName: 'Juan Dela Cruz',
+      photoURL: 'https://ui-avatars.com/api/?name=Juan+DelaCruz&background=00A86B&color=fff',
     });
     setUser(mockUser);
     await persistUser(mockUser);
@@ -355,7 +355,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       uid: 'facebook-mock-001',
       email: 'demo.facebook@mercuryplus.ph',
       displayName: 'Ana Gonzales',
-      photoURL: 'https://ui-avatars.com/api/?name=Ana+Gonzales&background=1877F2&color=fff',
+      photoURL: 'https://ui-avatars.com/api/?name=Ana+Gonzales&background=00A86B&color=fff',
     });
     setUser(mockUser);
     await persistUser(mockUser);
